@@ -2,6 +2,10 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/LaserScan.h>
 #include <cmath>
+#include <vector>
+
+#include <actionlib/client/simple_action_client.h>
+#include <door_state_detection/door_state_detection.h>
 
 class DoorStateDetect
 {
@@ -14,6 +18,7 @@ private:
 	ros::Publisher scan_pub;
 	ros::NodeHandle nh_;
 	float min_angle_, max_angle_;
+	float max_dis_to_door = 1.5;
 };
 
 DoorStateDetect::DoorStateDetect(float angle_min, float angle_max)
@@ -29,21 +34,32 @@ DoorStateDetect::DoorStateDetect(float angle_min, float angle_max)
 void DoorStateDetect::scanCallback(const sensor_msgs::LaserScan::ConstPtr& laserscan)
 {
 	//ROS_INFO("MSG RECEIVED");
-	sensor_msgs::LaserScan filtered_scan = *laserscan;
-	for(unsigned int i = 0; i < filtered_scan.ranges.size(); i++ ){
-		//ROS_INFO("MSG FILTER CASE %d",filtered_scan.ranges.size());
-		float new_angle_min = ((filtered_scan.angle_min + filtered_scan.angle_max) + fabs(min_angle_)) / filtered_scan.angle_increment;
-		float new_angle_max = ((filtered_scan.angle_max + filtered_scan.angle_max) - max_angle_)/ filtered_scan.angle_increment;
+	sensor_msgs::LaserScan copy_scan = *laserscan;
+	std::vector<float> filtered_scan;
+	for(unsigned int i = 0; i < copy_scan.ranges.size(); i++ ){
+		//ROS_INFO("MSG FILTER CASE %d",copy_scan.ranges.size());
+		/*float new_angle_min = (abs(copy_scan.angle_min + copy_scan.angle_max) + abs(copy_scan.angle_min) - abs(min_angle_)) / copy_scan.angle_increment;
+		float new_angle_max = (copy_scan.angle_max + copy_scan.angle_max -abs(copy_scan.angle_min) + max_angle_)/copy_scan.angle_increment;
 		std::cout<<new_angle_min<<std::endl;
-		std::cout<<new_angle_max<<std::endl;
-		if(i < ((filtered_scan.angle_min + filtered_scan.angle_max) + fabs(min_angle_)) / filtered_scan.angle_increment
-		|| i > ((filtered_scan.angle_max + filtered_scan.angle_max) - max_angle_)/ filtered_scan.angle_increment ){
-			filtered_scan.ranges[i] = 0;
-			//filtered_scan.angle_max = 0;
+		std::cout<<new_angle_max<<std::endl;*/
+		if(i < (abs(copy_scan.angle_min + copy_scan.angle_max) + abs(copy_scan.angle_min) - abs(min_angle_)) / copy_scan.angle_increment
+		|| i > (copy_scan.angle_max + copy_scan.angle_max -abs(copy_scan.angle_min) + max_angle_)/copy_scan.angle_increment){
+			copy_scan.ranges[i] = 0;
+			//copy_scan.angle_max = 0;
+		}else{
+			filtered_scan.push_back(copy_scan.ranges[i]);
 		}
+		float avg_dist;
+		for(int i; i < filtered_scan.size(); i++){
+			avg_dist+= filtered_scan[i];
+		}
+		if(avg_dist / filtered_scan.size() > max_dis_to_door)
+			std::cout<<"DOOR OPEN"<<std::endl;
+		else
+			std::cout<<"DOOR CLOSED"<<std::endl;
 	}
 	scan_pub = nh_.advertise<sensor_msgs::LaserScan>("scanfiltered", 50);
-	scan_pub.publish(filtered_scan);
+	scan_pub.publish(copy_scan);
 }
 
 int main(int argc, char** argv)
