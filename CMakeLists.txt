@@ -10,12 +10,21 @@ project(door_state_detection)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  actionlib_msgs
+)
+add_action_files(
+  DIRECTORY action
+  FILES door_state_detection.action
+)
+
+generate_messages(
+  DEPENDENCIES actionlib_msgs std_msgs  # Or other packages containing msgs
 )
 
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES door_state_detection
-   CATKIN_DEPENDS roscpp std_msgs
+   CATKIN_DEPENDS roscpp std_msgs actionlib_msgs
 #  DEPENDS system_lib
 )
 
@@ -29,3 +38,8 @@ target_link_libraries(
     door_state_detection
     ${catkin_LIBRARIES}
 )
+
+#install(DIRECTORY include/${PROJECT_NAME}/
+# DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+# FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+#)

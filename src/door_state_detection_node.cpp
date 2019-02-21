@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <actionlib/client/simple_action_client.h>
-#include <door_state_detection/door_state_detection.h>
+#include <door_state_detection/door_state_detectionAction.h>
 
 class DoorStateDetect
 {
@@ -64,7 +64,7 @@ void DoorStateDetect::scanCallback(const sensor_msgs::LaserScan::ConstPtr& laser
 
 int main(int argc, char** argv)
 {
-	ros::init(argc, argv, "laserscan_filter");
+	ros::init(argc, argv, "DoorStateDetection");
 	float angle_min, angle_max;
 	ros::NodeHandle nh("~");
 	nh.getParam("angle_min", angle_min);
