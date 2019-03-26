@@ -32,7 +32,7 @@ catkin_package(
 #  DEPENDS system_lib
 )
 include_directories(
-  include
+ # include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
