@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <actionlib/server/simple_action_server.h>
-#include <door_state_detection/door_state_detectionAction.h>
+#include <door_state_detection_msgs/door_state_detectionAction.h>
 
 class DoorStateDetect
 {
@@ -21,12 +21,11 @@ private:
 	ros::NodeHandle nh_;
 	float min_angle_, max_angle_;
 	std::string action_name_;
-	actionlib::SimpleActionServer<door_state_detection::door_state_detectionAction> as_; // NodeHandle instance must be created before this line. Otherwise strange error occurs.	
+	actionlib::SimpleActionServer<door_state_detection_msgs::door_state_detectionAction> as_; // NodeHandle instance must be created before this line. Otherwise strange error occurs.
 	float max_dis_to_door = 1.5;
   // create messages that are used to published feedback/result
-  door_state_detection::door_state_detectionAction feedback_;
-  door_state_detection::door_state_detectionResult result_;
-  bool lock_ = false ;
+  door_state_detection_msgs::door_state_detectionAction feedback_;
+  door_state_detection_msgs::door_state_detectionResult result_;
   int msgs_count_ = 0;
 };
 
@@ -47,7 +46,7 @@ void DoorStateDetect::goalCB()
 	ROS_INFO("goal recevied");
 	scan_sub_ = nh_.subscribe<sensor_msgs::LaserScan>("/scan", 1, &DoorStateDetect::scanCallback,this);
 	ros::spinOnce();
-	const door_state_detection::door_state_detectionGoalConstPtr goal = as_.acceptNewGoal();
+	const door_state_detection_msgs::door_state_detectionGoalConstPtr goal = as_.acceptNewGoal();
 	max_angle_ = goal->max_angle;
 	min_angle_ = goal->min_angle;
 
